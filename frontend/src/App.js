@@ -11,16 +11,20 @@ function App() {
       {page === "home" && (
         <HomePage
           onResult={(data) => {
+            console.log("Nhận result ở App:", data);
             setResult(data);
             setPage("result");
           }}
         />
       )}
 
-      {page === "result" && (
+      {page === "result" && result && (
         <ResultPage
           result={result}
-          onBack={() => setPage("home")}
+          onBack={() => {
+            setPage("home");
+            setResult(null);
+          }}
         />
       )}
     </>

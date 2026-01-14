@@ -2,130 +2,110 @@ import { periodToTime } from "../utils/time";
 
 const DAYS = [2, 3, 4, 5, 6, 7];
 
-const PERIOD_LABELS = {
-  1: "Tiết 1", 2: "Tiết 2", 3: "Tiết 3",
-  4: "Tiết 4", 5: "Tiết 5", 6: "Tiết 6",
-  7: "Tiết 7", 8: "Tiết 8", 9: "Tiết 9",
-  10: "Tiết 10", 11: "Tiết 11", 12: "Tiết 12"
-};
-
 function Timetable({ timetable }) {
   if (!timetable) return null;
 
-  /**
-   * grid[day][start] = {
-   *   start, end,
-   *   sessions: [ { maHP, maLop, loai, phong } ]
-   * }
-   */
+  // grid[day][period] = block
   const grid = {};
-  const occupied = {}; // occupied[day][period] = true
 
-  timetable.forEach(cls => {
-    cls.sessions.forEach(s => {
-      if (!grid[s.thu]) grid[s.thu] = {};
-      if (!occupied[s.thu]) occupied[s.thu] = {};
-
-      const key = s.start;
-
-      if (!grid[s.thu][key]) {
-        grid[s.thu][key] = {
-          start: s.start,
-          end: s.end,
-          sessions: []
-        };
-      }
-
-      grid[s.thu][key].sessions.push({
-        maHP: cls.maHP,
-        maLop: cls.maLop,
-        loai: s.loai || cls.type || "LT",
-        phong: s.phong
-      });
-
+  timetable.forEach(option => {
+    option.sessions.forEach(s => {
       for (let p = s.start; p <= s.end; p++) {
-        occupied[s.thu][p] = true;
+        if (!grid[s.thu]) grid[s.thu] = {};
+        grid[s.thu][p] = {
+          option,
+          session: s
+        };
       }
     });
   });
 
-  function renderRows(periods) {
-    return periods.map(p => (
-      <tr key={p}>
-        <td>{PERIOD_LABELS[p]}</td>
+  function renderCell(day, period) {
+    const cell = grid[day]?.[period];
+    if (!cell) return <td></td>;
 
-        {DAYS.map(d => {
-          // Bỏ qua ô đã bị chiếm bởi rowspan phía trên
-          if (occupied[d]?.[p] && !grid[d]?.[p]) {
-            return null;
-          }
+    const { option, session } = cell;
 
-          const cell = grid[d]?.[p];
-          if (!cell) return <td key={d}></td>;
+    // chỉ render tại tiết bắt đầu
+    if (period !== session.start) return null;
 
-          return (
-            <td
-              key={d}
-              rowSpan={cell.end - cell.start + 1}
-              style={{
-                background: "#a8e6a3",
-                borderRadius: 6,
-                padding: 6
-              }}
-            >
-              {cell.sessions.map((s, i) => (
-                <div key={i} style={{ marginBottom: 4 }}>
-                  <b>{s.maHP} – {s.maLop}</b><br />
-                  {s.loai} | {periodToTime(cell.start)}–{periodToTime(cell.end)}<br />
-                  {s.phong}
-                </div>
-              ))}
-            </td>
-          );
-        })}
-      </tr>
-    ));
+    const rowSpan = session.end - session.start + 1;
+
+    return (
+      <td
+        rowSpan={rowSpan}
+        style={{
+          background: "#e6f7ff",
+          border: "1px solid #999",
+          verticalAlign: "top",
+          padding: 6
+        }}
+      >
+        <b>{option.maHP}</b><br />
+
+        {option.blocks.map(b => (
+          <div key={b.maLop}>
+            {b.loai} – {b.maLop}
+          </div>
+        ))}
+
+        <div style={{ fontSize: 12, marginTop: 4 }}>
+          {periodToTime(session.start)} – {periodToTime(session.end)}
+        </div>
+
+        <div style={{ fontSize: 12 }}>
+          {session.phong}
+        </div>
+      </td>
+    );
   }
 
   return (
     <table
-      border="1"
-      cellPadding="6"
       style={{
         borderCollapse: "collapse",
-        width: "100%"
+        width: "100%",
+        marginTop: 20
       }}
     >
       <thead>
         <tr>
           <th>Tiết</th>
-          {DAYS.map(d => <th key={d}>Thứ {d}</th>)}
+          {DAYS.map(d => (
+            <th key={d}>Thứ {d}</th>
+          ))}
         </tr>
       </thead>
 
       <tbody>
         {/* ===== SÁNG ===== */}
         <tr>
-          <td colSpan={8} style={{ background: "#eee", textAlign: "center" }}>
-            <b>Sáng</b>
+          <td colSpan={8} style={{ background: "#ddd", textAlign: "center" }}>
+            <b>SÁNG</b>
           </td>
         </tr>
-        {renderRows([1, 2, 3, 4, 5, 6])}
+
+        {[1, 2, 3, 4, 5, 6].map(p => (
+          <tr key={p}>
+            <td>Tiết {p}</td>
+            {DAYS.map(d => renderCell(d, p))}
+          </tr>
+        ))}
 
         {/* ===== NGHỈ TRƯA ===== */}
         <tr>
-          <td colSpan={8} style={{ background: "#2f6f4e", color: "white", textAlign: "center" }}>
-            Nghỉ trưa
+          <td colSpan={8} style={{ background: "#f0f0f0", textAlign: "center" }}>
+            <i>Nghỉ trưa</i>
           </td>
         </tr>
 
         {/* ===== CHIỀU ===== */}
-        <tr>
-          <td colSpan={8} style={{ background: "#eee", textAlign: "center" }}>
-            <b>Chiều</b>
-          </td>
-        </tr>
-        {renderRows([7, 8, 9, 10, 11, 12])}
+        {[7, 8, 9, 10, 11, 12].map(p => (
+          <tr key={p}>
+            <td>Tiết {p}</td>
+            {DAYS.map(d => renderCell(d, p))}
+          </tr>
+        ))}
       </tbody>
     </table>
   );

@@ -1,62 +1,66 @@
 function buildOptions(classes) {
   const byHP = {};
-  classes.forEach(cls => {
+
+  // Gom theo học phần
+  for (const cls of classes) {
     if (!byHP[cls.maHP]) byHP[cls.maHP] = [];
     byHP[cls.maHP].push(cls);
-  });
+  }
 
   const options = {};
 
   for (const maHP in byHP) {
     const list = byHP[maHP];
 
-    const LT = list.filter(c => c.loai === "LT" && !c.maLopKem);
-    const BT = list.filter(c => c.loai === "BT" && c.maLopKem);
-    const LTBT = list.filter(
-      c => c.loai === "LT+BT" || c.maLopKem === c.maLop
-    );
+    const LT = list.filter(c => c.loai === "LT");
+    const BT = list.filter(c => c.loai === "BT");
+    const LTBT = list.filter(c => c.loai === "LT+BT");
     const TN = list.filter(c => c.loai === "TN");
 
     options[maHP] = [];
 
-    // 1️⃣ LT + BT combo
+    // 1️⃣ LT+BT sẵn
+    for (const c of LTBT) {
+      options[maHP].push({
+        maHP,
+        combo: [c]
+      });
+    }
+
+    // 2️⃣ Ghép LT + BT
     for (const lt of LT) {
-      const btList = BT.filter(bt => bt.maLopKem === lt.maLop);
+      const btList = BT.filter(
+        bt => bt.maLopKem === lt.maLop
+      );
 
-      for (const bt of btList) {
-        const combo = {
+      if (btList.length === 0) {
+        // Chỉ có LT (vẫn hợp lệ)
+        options[maHP].push({
           maHP,
-          sessions: [...lt.sessions, ...bt.sessions],
-          loai: "LT+BT"
-        };
-
-        if (TN.length === 0) {
-          options[maHP].push(combo);
-        } else {
-          for (const tn of TN) {
-            options[maHP].push({
-              maHP,
-              sessions: [...combo.sessions, ...tn.sessions],
-              loai: "LT+BT+TN"
-            });
-          }
+          combo: [lt]
+        });
+      } else {
+        for (const bt of btList) {
+          options[maHP].push({
+            maHP,
+            combo: [lt, bt]
+          });
         }
       }
     }
 
-    // 2️⃣ LT+BT gộp sẵn
-    for (const c of LTBT) {
-      if (TN.length === 0) {
-        options[maHP].push(c);
-      } else {
+    // 3️⃣ Thêm TN (nếu có)
+    if (TN.length > 0) {
+      const withTN = [];
+      for (const opt of options[maHP]) {
         for (const tn of TN) {
-          options[maHP].push({
+          withTN.push({
             maHP,
-            sessions: [...c.sessions, ...tn.sessions],
-            loai: "LT+BT+TN"
+            combo: [...opt.combo, tn]
           });
         }
       }
+      options[maHP] = withTN;
     }
   }
 

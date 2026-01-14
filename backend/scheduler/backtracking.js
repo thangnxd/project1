@@ -1,4 +1,4 @@
-const { classConflict } = require("../utils/conflict.js");
+const { classConflict } = require("../utils/conflict");
 
 function schedule(courses, options, limit = 1000) {
   const results = [];
@@ -13,35 +13,18 @@ function schedule(courses, options, limit = 1000) {
     }
 
     const maHP = courses[i];
-    const combos = options[maHP] || [];
+    const optionList = options[maHP];
 
-    if (combos.length === 0) return;
+    if (!optionList || optionList.length === 0) return;
 
-    for (const combo of combos) {
-      // combo = [LT, TH]
+    for (const opt of optionList) {
+      const combo = opt.combo;
 
-      // 1. Check conflict cho TỪNG lớp trong combo
-      let conflict = false;
-      for (const cls of combo) {
-        if (classConflict(cls, current)) {
-          conflict = true;
-          break;
-        }
-      }
+      if (classConflict(combo, current)) continue;
 
-      if (conflict) continue;
-
-      // 2. Thêm toàn bộ combo
-      for (const cls of combo) {
-        current.push(cls);
-      }
-
+      current.push(...combo);
       backtrack(i + 1);
-
-      // 3. Gỡ combo ra
-      for (let k = 0; k < combo.length; k++) {
-        current.pop();
-      }
+      current.splice(current.length - combo.length);
     }
   }
 

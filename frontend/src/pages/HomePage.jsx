@@ -18,7 +18,7 @@ function HomePage({ onResult }) {
       body: formData
     });
 
-    alert("Upload & xử lý Excel thành công");
+    alert("Upload Excel thành công");
   }
 
   async function runSchedule() {
@@ -37,16 +37,24 @@ function HomePage({ onResult }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         courses,
-        limit: 1000   // ✅ nâng giới hạn theo yêu cầu
+        limit: 1000
       })
     });
 
     const data = await res.json();
 
-    // ❗ backend trả ok = false nếu có môn không xếp được
-    if (!data.ok) {
+    console.log("API /schedule trả về:", data);
+
+    // ❌ Nếu backend trả sai format
+    if (!data || typeof data !== "object") {
+      alert("Backend trả dữ liệu không hợp lệ");
+      return;
+    }
+
+    // ❌ Nếu backend báo không xếp được
+    if (data.ok === false) {
       alert(
-        data.message +
+        (data.message || "Có lỗi xảy ra") +
         (data.impossible
           ? "\nKhông xếp được: " + data.impossible.join(", ")
           : "")
@@ -54,29 +62,32 @@ function HomePage({ onResult }) {
       return;
     }
 
-    // ✅ ĐÚNG: trả dữ liệu về App.js
+    // ❌ Nếu không có kết quả
+    if (!Array.isArray(data.top) || data.top.length === 0) {
+      alert("Không có kết quả hợp lệ");
+      return;
+    }
+
+    // ✅ CHỈ CHẠY DÒNG NÀY KHI OK
     onResult(data);
+
   }
 
   return (
     <div style={{ padding: 20 }}>
       <h1>Xếp thời khóa biểu</h1>
 
-      <input
-        type="file"
-        onChange={e => setFile(e.target.files[0])}
-      />
+      <input type="file" onChange={e => setFile(e.target.files[0])} />
       <br /><br />
 
       <input
         style={{ width: 400 }}
-        placeholder="VD: SSH1131, SSH1141, PH1120"
+        placeholder="VD: SSH1131, SSH1141"
         value={coursesInput}
         onChange={e => setCoursesInput(e.target.value)}
       />
 
       <br /><br />
-
       <button onClick={uploadExcel}>Upload Excel</button>
       <button onClick={runSchedule} style={{ marginLeft: 10 }}>
         Xếp TKB
