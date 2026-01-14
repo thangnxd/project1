@@ -8,23 +8,28 @@ function schedule(courses, options, limit = 1000) {
     if (results.length >= limit) return;
 
     if (i === courses.length) {
-      results.push(JSON.parse(JSON.stringify(current)));
+      results.push(current.flat());
       return;
     }
 
     const maHP = courses[i];
-    const optionList = options[maHP];
+    const combos = options[maHP] || [];
 
-    if (!optionList || optionList.length === 0) return;
+    for (const combo of combos) {
+      let ok = true;
 
-    for (const opt of optionList) {
-      const combo = opt.combo;
+      for (const cls of combo) {
+        if (classConflict(cls, current)) {
+          ok = false;
+          break;
+        }
+      }
 
-      if (classConflict(combo, current)) continue;
+      if (!ok) continue;
 
       current.push(...combo);
       backtrack(i + 1);
-      current.splice(current.length - combo.length);
+      combo.forEach(() => current.pop());
     }
   }
 

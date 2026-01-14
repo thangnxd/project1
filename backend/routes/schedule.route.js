@@ -26,6 +26,7 @@ router.post("/", (req, res) => {
       hp => !options[hp] || options[hp].length === 0
     );
 
+
     if (impossible.length > 0) {
       return res.json({
         ok: false,

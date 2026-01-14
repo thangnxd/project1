@@ -1,67 +1,40 @@
 function buildOptions(classes) {
   const byHP = {};
+  const options = {};
 
-  // Gom theo học phần
+  // 1. Gom theo học phần
   for (const cls of classes) {
     if (!byHP[cls.maHP]) byHP[cls.maHP] = [];
     byHP[cls.maHP].push(cls);
   }
 
-  const options = {};
-
+  // 2. Build options cho từng học phần
   for (const maHP in byHP) {
     const list = byHP[maHP];
-
-    const LT = list.filter(c => c.loai === "LT");
-    const BT = list.filter(c => c.loai === "BT");
-    const LTBT = list.filter(c => c.loai === "LT+BT");
-    const TN = list.filter(c => c.loai === "TN");
-
     options[maHP] = [];
 
-    // 1️⃣ LT+BT sẵn
-    for (const c of LTBT) {
-      options[maHP].push({
-        maHP,
-        combo: [c]
-      });
-    }
+    // a. LT+BT (hoàn chỉnh)
+    list
+      .filter(c => c.loai === "LT+BT")
+      .forEach(c => options[maHP].push([c]));
 
-    // 2️⃣ Ghép LT + BT
+    // b. LT + BT combo
+    const LT = list.filter(c => c.loai === "LT" && !c.maLopKem);
+    const BT = list.filter(c => c.loai === "BT" && c.maLopKem);
+
     for (const lt of LT) {
-      const btList = BT.filter(
-        bt => bt.maLopKem === lt.maLop
-      );
-
-      if (btList.length === 0) {
-        // Chỉ có LT (vẫn hợp lệ)
-        options[maHP].push({
-          maHP,
-          combo: [lt]
+      BT.filter(bt => bt.maLopKem === lt.maLop)
+        .forEach(bt => {
+          options[maHP].push([lt, bt]);
         });
-      } else {
-        for (const bt of btList) {
-          options[maHP].push({
-            maHP,
-            combo: [lt, bt]
-          });
-        }
-      }
     }
 
-    // 3️⃣ Thêm TN (nếu có)
-    if (TN.length > 0) {
-      const withTN = [];
-      for (const opt of options[maHP]) {
-        for (const tn of TN) {
-          withTN.push({
-            maHP,
-            combo: [...opt.combo, tn]
-          });
-        }
-      }
-      options[maHP] = withTN;
-    }
+    // c. TN (độc lập)
+    list
+      .filter(c => c.loai === "TN")
+      .forEach(tn => {
+        options[maHP].push([tn]);
+      });
   }
 
   return options;

@@ -13,10 +13,15 @@ function HomePage({ onResult }) {
     const formData = new FormData();
     formData.append("file", file);
 
-    await fetch("http://localhost:3001/api/upload", {
+    const res = await fetch("http://localhost:3001/api/upload", {
       method: "POST",
       body: formData
     });
+
+    if (!res.ok) {
+      alert("Upload Excel thất bại");
+      return;
+    }
 
     alert("Upload Excel thành công");
   }
@@ -32,29 +37,34 @@ function HomePage({ onResult }) {
       return;
     }
 
-    const res = await fetch("http://localhost:3001/api/schedule", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        courses,
-        limit: 1000
-      })
-    });
-
-    const data = await res.json();
-
-    console.log("API /schedule trả về:", data);
-
-    // ❌ Nếu backend trả sai format
-    if (!data || typeof data !== "object") {
-      alert("Backend trả dữ liệu không hợp lệ");
+    let res;
+    try {
+      res = await fetch("http://localhost:3001/api/schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          courses,
+          limit: 1000
+        })
+      });
+    } catch (e) {
+      alert("Không kết nối được backend");
       return;
     }
 
-    // ❌ Nếu backend báo không xếp được
+    // ❌ HTTP error (500, 400…)
+    if (!res.ok) {
+      alert("Backend lỗi khi xếp thời khóa biểu");
+      return;
+    }
+
+    const data = await res.json();
+    console.log("API /schedule trả về:", data);
+
+    // ❌ Backend trả lỗi
     if (data.ok === false) {
       alert(
-        (data.message || "Có lỗi xảy ra") +
+        data.message +
         (data.impossible
           ? "\nKhông xếp được: " + data.impossible.join(", ")
           : "")
@@ -62,15 +72,14 @@ function HomePage({ onResult }) {
       return;
     }
 
-    // ❌ Nếu không có kết quả
+    // ❌ Không có kết quả
     if (!Array.isArray(data.top) || data.top.length === 0) {
-      alert("Không có kết quả hợp lệ");
+      alert("Không có kết quả thời khóa biểu hợp lệ");
       return;
     }
 
-    // ✅ CHỈ CHẠY DÒNG NÀY KHI OK
+    // ✅ OK → chuyển sang trang kết quả
     onResult(data);
-
   }
 
   return (
