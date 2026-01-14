@@ -1,36 +1,50 @@
 import { useState } from "react";
 import Timetable from "../components/Timetable";
-import ResultHeader from "../components/ResultHeader";
 import OptionsPanel from "../components/OptionsPanel";
+import ResultHeader from "../components/ResultHeader";
 
 function ResultPage({ result, onBack }) {
   const [pageIndex, setPageIndex] = useState(0);
+  const [criteria, setCriteria] = useState("random");
+  const [sorted, setSorted] = useState(result.top);
 
-  // ✅ GUARD RẤT QUAN TRỌNG
-  if (!result || !Array.isArray(result.top) || result.top.length === 0) {
-    return (
-      <div style={{ padding: 20 }}>
-        <button onClick={onBack}>← Quay lại</button>
-        <p>Không có kết quả hợp lệ</p>
-      </div>
-    );
+  function applyFilter() {
+    let newSorted = [...result.top];
+
+    if (criteria === "offMorning") {
+      newSorted.sort((a, b) => b.score.offMorning - a.score.offMorning);
+    } else if (criteria === "offAfternoon") {
+      newSorted.sort((a, b) => b.score.offAfternoon - a.score.offAfternoon);
+    } else if (criteria === "offDay") {
+      newSorted.sort((a, b) => b.score.offDay - a.score.offDay);
+    } else {
+      // random → giữ nguyên
+      newSorted = [...result.top];
+    }
+
+    setSorted(newSorted);
+    setPageIndex(0); // ⭐ rất quan trọng để refresh
   }
 
-  const current = result.top[pageIndex];
-  const timetable = current.timetable;
+  const timetable = sorted?.[pageIndex]?.timetable;
+  if (!timetable) return <div>Không có kết quả</div>;
 
   return (
     <div style={{ padding: 20 }}>
       <button onClick={onBack}>← Quay lại</button>
 
-      <ResultHeader result={result} />
+      <ResultHeader result={{ ...result, total: sorted.length }} />
 
-      <div style={{ display: "flex", alignItems: "flex-start" }}>
+      <div style={{ display: "flex" }}>
         <Timetable timetable={timetable} />
-        <OptionsPanel />
+
+        <OptionsPanel
+          criteria={criteria}
+          setCriteria={setCriteria}
+          onApply={applyFilter}
+        />
       </div>
 
-      {/* PAGINATION */}
       <div style={{ marginTop: 20, textAlign: "center" }}>
         <button onClick={() => setPageIndex(0)}>Trang đầu</button>
 
@@ -38,20 +52,19 @@ function ResultPage({ result, onBack }) {
           onClick={() => setPageIndex(i => Math.max(i - 1, 0))}
           style={{ marginLeft: 10 }}
         >
-          Kết quả trước
+          Trước
         </button>
 
         <span style={{ margin: "0 15px" }}>
-          Trang {pageIndex + 1}/{result.top.length}
+          {pageIndex + 1}/{sorted.length}
         </span>
 
         <button
           onClick={() =>
-            setPageIndex(i => Math.min(i + 1, result.top.length - 1))
+            setPageIndex(i => Math.min(i + 1, sorted.length - 1))
           }
-          style={{ marginLeft: 10 }}
         >
-          Kết quả sau
+          Sau
         </button>
       </div>
     </div>

@@ -1,6 +1,6 @@
 const { classConflict } = require("../utils/conflict");
 
-function schedule(courses, options, limit = 1000) {
+function schedule(courses, options, limit = 10000) {
   const results = [];
   const current = [];
 

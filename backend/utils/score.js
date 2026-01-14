@@ -1,28 +1,38 @@
-function scoreTimetable(timetable, criteria) {
-  let score = 0;
+function countMorning(tkb) {
+  return tkb.filter(cls =>
+    cls.sessions.some(s => s.start <= 6)
+  ).length;
+}
 
+function countAfternoon(tkb) {
+  return tkb.filter(cls =>
+    cls.sessions.some(s => s.start > 6)
+  ).length;
+}
+
+function countOffDays(tkb) {
   const days = new Set();
-  let morningSessions = 0;
-  let afternoonSessions = 0;
+  tkb.forEach(cls =>
+    cls.sessions.forEach(s => days.add(s.thu))
+  );
+  return 7 - days.size;
+}
 
-  for (const cls of timetable) {
-    for (const s of cls.sessions) {
-      days.add(s.thu);
+function scoreTimetable(tkb, criteria) {
+  switch (criteria) {
+    case "offMorning":
+      return countMorning(tkb);
 
-      // sáng: tiết 1-6, chiều: >=7 (bạn có thể chỉnh)
-      if (s.start < 7) morningSessions++;
-      else afternoonSessions++;
-    }
+    case "offAfternoon":
+      return countAfternoon(tkb);
+
+    case "offDay":
+      return countOffDays(tkb);
+
+    case "random":
+    default:
+      return Math.random();
   }
-
-  const totalDays = days.size;
-
-  // ====== CHẤM ĐIỂM ======
-  score += (criteria.morningOff || 0) * (10 - morningSessions);
-  score += (criteria.afternoonOff || 0) * (10 - afternoonSessions);
-  score += (criteria.dayOff || 0) * (7 - totalDays);
-
-  return score;
 }
 
 module.exports = { scoreTimetable };

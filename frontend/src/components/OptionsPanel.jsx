@@ -14,7 +14,10 @@ function OptionsPanel({ criteria, setCriteria, onApply }) {
         <option value="offDay">Nghỉ cả ngày</option>
       </select>
 
-      <button onClick={onApply} style={{ width: "100%" }}>
+      <button
+        style={{ width: "100%", background: "green", color: "white" }}
+        onClick={onApply}
+      >
         Áp dụng
       </button>
     </div>

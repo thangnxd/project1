@@ -18,45 +18,59 @@ function parseWeeks(str) {
 
 function parseExcel(file) {
   const workbook = xlsx.read(file.buffer, { type: "buffer" });
-  const sheetName = workbook.SheetNames[0];
-  const sheet = workbook.Sheets[sheetName];
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
   const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
-
   const headerIndex = rows.findIndex(r => r.includes("Mã_HP"));
   const headers = rows[headerIndex];
   const dataRows = rows.slice(headerIndex + 1);
 
-  const classes = [];
+  // ⭐ MAP GỘP THEO MÃ LỚP
+  const classMap = new Map();
 
   for (const row of dataRows) {
     const maHP = row[headers.indexOf("Mã_HP")];
     if (!maHP) continue;
 
-    classes.push({
-      maHP,
-      tenHP:row[headers.indexOf("Tên_HP")],
-      maLop: row[headers.indexOf("Mã_lớp")],
-      maLopKem: row[headers.indexOf("Mã_lớp_kèm")] || null,
-      loai: row[headers.indexOf("Loại_lớp")],   // ⭐ CỰC KỲ QUAN TRỌNG
+    const maLop = row[headers.indexOf("Mã_lớp")];
+    const key = `${maHP}_${maLop}`;
+
+    const kip = row[headers.indexOf("Kíp")];
+    let start = Number(row[headers.indexOf("BĐ")]);
+    let end = Number(row[headers.indexOf("KT")]);
+
+    // ✔ SÁNG / CHIỀU
+    if (kip === "Chiều") {
+      start += 6;
+      end += 6;
+    }
+
+    const session = {
       thu: Number(row[headers.indexOf("Thứ")]),
-      start: Number(row[headers.indexOf("BĐ")]),
-      end: Number(row[headers.indexOf("KT")]),
+      start,
+      end,
       tuan: parseWeeks(row[headers.indexOf("Tuần")]),
       phong: row[headers.indexOf("Phòng")],
-      so: row[headers.indexOf("Buổi_số")],
-      sessions: [{
-        thu: Number(row[headers.indexOf("Thứ")]),
-        start: Number(row[headers.indexOf("BĐ")]),
-        end: Number(row[headers.indexOf("KT")]),
-        tuan: parseWeeks(row[headers.indexOf("Tuần")]),
-        phong: row[headers.indexOf("Phòng")],
-        so: row[headers.indexOf("Buổi_số")]
-      }]
-    });
+      so: row[headers.indexOf("Buổi_số")]
+    };
+
+    if (!classMap.has(key)) {
+      classMap.set(key, {
+        maHP,
+        tenHP: row[headers.indexOf("Tên_HP")],
+        maLop,
+        maLopKem: row[headers.indexOf("Mã_lớp_kèm")] || null,
+        loai: row[headers.indexOf("Loại_lớp")],
+        maQL: row[headers.indexOf("Mã_QL")],  
+        sessions: [session]
+      });
+    } else {
+      // ⭐ BUỔI SỐ 2 → GỘP VÀO
+      classMap.get(key).sessions.push(session);
+    }
   }
 
-  return classes;
+  return Array.from(classMap.values());
 }
 
 module.exports = { parseExcel };

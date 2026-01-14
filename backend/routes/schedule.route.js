@@ -10,7 +10,8 @@ router.post("/", (req, res) => {
 
   console.log("REQ BODY:", req.body);
   try {
-    const { courses, limit = 1000, criteria = {} } = req.body;
+    const { courses, limit = 1000, criteria = {}, program } = req.body;
+
 
     if (!courses || courses.length === 0) {
       return res.status(400).json({ ok: false, message: "Danh sách học phần rỗng" });
@@ -20,7 +21,16 @@ router.post("/", (req, res) => {
       return res.json({ ok: false, message: "Chưa upload Excel" });
     }
 
-    const options = buildOptions(store.allClasses);
+    let usableClasses = store.allClasses;
+
+    // ⭐ LỌC THEO CHƯƠNG TRÌNH ĐÀO TẠO
+    if (program) {
+      usableClasses = usableClasses.filter(c => c.maQL === program);
+    }
+
+
+    const options = buildOptions(usableClasses);
+
 
     const impossible = courses.filter(
       hp => !options[hp] || options[hp].length === 0

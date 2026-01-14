@@ -3,6 +3,7 @@ import { useState } from "react";
 function HomePage({ onResult }) {
   const [file, setFile] = useState(null);
   const [coursesInput, setCoursesInput] = useState("");
+  const [selectedProgram, setSelectedProgram] = useState("CT CHUẨN"); // ⭐ THÊM
 
   async function uploadExcel() {
     if (!file) {
@@ -44,7 +45,8 @@ function HomePage({ onResult }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           courses,
-          limit: 1000
+          limit: 1000,
+          program: selectedProgram   // ⭐ GỬI LÊN BACKEND
         })
       });
     } catch (e) {
@@ -52,7 +54,6 @@ function HomePage({ onResult }) {
       return;
     }
 
-    // ❌ HTTP error (500, 400…)
     if (!res.ok) {
       alert("Backend lỗi khi xếp thời khóa biểu");
       return;
@@ -61,7 +62,6 @@ function HomePage({ onResult }) {
     const data = await res.json();
     console.log("API /schedule trả về:", data);
 
-    // ❌ Backend trả lỗi
     if (data.ok === false) {
       alert(
         data.message +
@@ -72,19 +72,39 @@ function HomePage({ onResult }) {
       return;
     }
 
-    // ❌ Không có kết quả
     if (!Array.isArray(data.top) || data.top.length === 0) {
       alert("Không có kết quả thời khóa biểu hợp lệ");
       return;
     }
 
-    // ✅ OK → chuyển sang trang kết quả
     onResult(data);
   }
 
   return (
     <div style={{ padding: 20 }}>
       <h1>Xếp thời khóa biểu</h1>
+
+      {/* ⭐ CHỌN CHƯƠNG TRÌNH */}
+      <div style={{ marginBottom: 10 }}>
+        <b>Chương trình đào tạo:</b><br />
+        {["CT CHUẨN", "ELITECH", "SIE"].map(p => (
+          <button
+            key={p}
+            onClick={() => setSelectedProgram(p)}
+            style={{
+              marginRight: 8,
+              padding: "6px 12px",
+              background: selectedProgram === p ? "#22c55e" : "#eee",
+              color: selectedProgram === p ? "#fff" : "#000",
+              border: "none",
+              borderRadius: 4,
+              cursor: "pointer"
+            }}
+          >
+            {p}
+          </button>
+        ))}
+      </div>
 
       <input type="file" onChange={e => setFile(e.target.files[0])} />
       <br /><br />
