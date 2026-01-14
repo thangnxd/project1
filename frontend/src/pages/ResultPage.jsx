@@ -23,7 +23,7 @@ function ResultPage({ result, onBack }) {
     }
 
     setSorted(newSorted);
-    setPageIndex(0); // ⭐ rất quan trọng để refresh
+    setPageIndex(0); 
   }
 
   const timetable = sorted?.[pageIndex]?.timetable;

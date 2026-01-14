@@ -18,7 +18,7 @@ function buildOptions(classes) {
 
     options[maHP] = [];
 
-    // 1️⃣ LT+BT gộp sẵn
+    // Nếu là lớp LT+BT
     for (const cls of ltbt) {
       options[maHP].push({
         maHP,
@@ -29,7 +29,7 @@ function buildOptions(classes) {
       });
     }
 
-    // 2️⃣ Ghép LT + BT theo mã lớp kèm
+    // Nếu là lớp LT và BT tách riêng thì ghép
     for (const ltCls of lt) {
       const btOfLT = bt.filter(
         b => b.maLopKem === ltCls.maLop
@@ -49,7 +49,7 @@ function buildOptions(classes) {
       }
     }
 
-    // 3️⃣ TN là option độc lập
+    //Lớp TN
     for (const tnCls of tn) {
       options[maHP].push({
         maHP,

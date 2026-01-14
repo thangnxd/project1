@@ -25,7 +25,7 @@ function parseExcel(file) {
   const headers = rows[headerIndex];
   const dataRows = rows.slice(headerIndex + 1);
 
-  // ⭐ MAP GỘP THEO MÃ LỚP
+  // Gộp map theo mã lớp
   const classMap = new Map();
 
   for (const row of dataRows) {
@@ -39,7 +39,7 @@ function parseExcel(file) {
     let start = Number(row[headers.indexOf("BĐ")]);
     let end = Number(row[headers.indexOf("KT")]);
 
-    // ✔ SÁNG / CHIỀU
+    // Nếu là kíp chiều thì tăng số tiết lên do tkb hust đều đánh từ 1 đến 6
     if (kip === "Chiều") {
       start += 6;
       end += 6;
@@ -65,7 +65,7 @@ function parseExcel(file) {
         sessions: [session]
       });
     } else {
-      // ⭐ BUỔI SỐ 2 → GỘP VÀO
+      //Nếu những lớp có 2 buổi 1 tuần thì ghép nó vào
       classMap.get(key).sessions.push(session);
     }
   }

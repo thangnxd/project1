@@ -5,12 +5,12 @@ const MORNING = [1, 2, 3, 4, 5, 6];
 const AFTERNOON = [7, 8, 9, 10, 11, 12];
 
 function Timetable({ timetable }) {
-  // ⛑️ GUARD RẤT QUAN TRỌNG
+  
   if (!Array.isArray(timetable)) {
     return <div>Không có thời khóa biểu hợp lệ</div>;
   }
 
-  // grid[day][period] = { cls, session }
+  
   const grid = {};
 
   timetable.forEach(cls => {

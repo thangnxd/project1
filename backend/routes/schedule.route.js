@@ -23,7 +23,7 @@ router.post("/", (req, res) => {
 
     let usableClasses = store.allClasses;
 
-    // ⭐ LỌC THEO CHƯƠNG TRÌNH ĐÀO TẠO
+    // Lọc theo ct chuẩn/elitech/sie
     if (program) {
       usableClasses = usableClasses.filter(c => c.maQL === program);
     }

@@ -3,7 +3,7 @@ import { useState } from "react";
 function HomePage({ onResult }) {
   const [file, setFile] = useState(null);
   const [coursesInput, setCoursesInput] = useState("");
-  const [selectedProgram, setSelectedProgram] = useState("CT CHUẨN"); // ⭐ THÊM
+  const [selectedProgram, setSelectedProgram] = useState("CT CHUẨN"); 
 
   async function uploadExcel() {
     if (!file) {
@@ -46,7 +46,7 @@ function HomePage({ onResult }) {
         body: JSON.stringify({
           courses,
           limit: 1000,
-          program: selectedProgram   // ⭐ GỬI LÊN BACKEND
+          program: selectedProgram
         })
       });
     } catch (e) {
@@ -84,7 +84,7 @@ function HomePage({ onResult }) {
     <div style={{ padding: 20 }}>
       <h1>Xếp thời khóa biểu</h1>
 
-      {/* ⭐ CHỌN CHƯƠNG TRÌNH */}
+      {/* chọn cddt */}
       <div style={{ marginBottom: 10 }}>
         <b>Chương trình đào tạo:</b><br />
         {["CT CHUẨN", "ELITECH", "SIE"].map(p => (

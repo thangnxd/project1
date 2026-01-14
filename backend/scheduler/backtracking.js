@@ -16,7 +16,7 @@ function schedule(courses, options, limit = 10000) {
     const classList = options[maHP] || [];
 
     for (const cls of classList) {
-      // cls giờ là 1 OBJECT duy nhất (LT+BT hoặc TN)
+      
       if (classConflict(cls, current)) continue;
 
       current.push(cls);
