@@ -40,7 +40,7 @@ function Timetable({ timetable }) {
             >
               <b>{cls.maHP}</b> - {cls.tenHP}<br />
               <b>{cls.loai}</b> - {cls.maLop}<br />
-              {periodToTime(session.start)} - {periodToTime(session.end)}<br />
+              {periodToTime(session.start)} - {periodToTime(session.end + 1)}<br />
               {session.phong}
             </td>
           );
