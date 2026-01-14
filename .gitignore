@@ -1,0 +1,8 @@
+# Backend
+backend/node_modules
+
+# Env
+.env
+
+# OS
+.DS_Store

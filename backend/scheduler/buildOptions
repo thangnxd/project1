@@ -1,0 +1,39 @@
+function buildOptions(classes) {
+  const byHP = {};
+  const byMaLop = {};
+
+  // 1. Gom theo mã HP + index theo mã lớp
+  for (const cls of classes) {
+    if (!byHP[cls.maHP]) byHP[cls.maHP] = [];
+    byHP[cls.maHP].push(cls);
+
+    byMaLop[cls.maLop] = cls;
+  }
+
+  const options = {};
+
+  // 2. Build combo LT + lớp kèm
+  for (const maHP in byHP) {
+    options[maHP] = [];
+
+    for (const cls of byHP[maHP]) {
+      // ❌ bỏ lớp LT thuần (maLopKem = null)
+      if (!cls.maLopKem) continue;
+
+      // TH hoặc LT gắn kèm chính nó
+      if (cls.maLopKem === cls.maLop) {
+        options[maHP].push([cls]);
+        continue;
+      }
+
+      const parent = byMaLop[cls.maLopKem];
+      if (!parent) continue;
+
+      options[maHP].push([parent, cls]);
+    }
+  }
+
+  return options;
+}
+
+module.exports = buildOptions;
