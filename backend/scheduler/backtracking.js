@@ -1,4 +1,4 @@
-const { classConflict } = require("../utils/conflict");
+const { classConflict } = require("../utils/conflict.js");
 
 function schedule(courses, options, limit = 1000) {
   const results = [];

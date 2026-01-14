@@ -1,35 +1,28 @@
-function TimetableCell({ timetable, day, from, to }) {
-  const items = [];
+import { periodToTime } from "../utils/time";
 
-  for (const cls of timetable) {
-    for (const s of cls.sessions) {
-      if (s.thu !== day) continue;
-      if (s.end < from || s.start > to) continue;
-
-      items.push({ cls, s });
-    }
-  }
+function TimetableCell({ blocks }) {
+  if (!blocks || blocks.length === 0) return null;
 
   return (
-    <>
-      {items.map((it, i) => (
+    <div>
+      {blocks.map((b, i) => (
         <div
           key={i}
           style={{
-                background: "#0a8f08",
-                color: "white",
-                borderRadius: 8,
-                padding: 6,
-                marginBottom: 6,
-                fontSize: 12
-            }}
+            background: b.loai === "TN" ? "#ffb3b3" :
+                        b.loai === "BT" ? "#ffd966" : "#a8e6a3",
+            padding: 6,
+            borderRadius: 6,
+            marginBottom: 6,
+            fontSize: 12
+          }}
         >
-          <b>{it.cls.maHP}</b><br />
-          {it.s.start}–{it.s.end}<br />
-          {it.s.phong}
+          <b>{b.maHP} – {b.maLop}</b><br />
+          {b.loai} | {periodToTime(b.start)} – {periodToTime(b.end)}<br />
+          {b.phong}
         </div>
       ))}
-    </>
+    </div>
   );
 }
 

@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const schedule = require("../scheduler/backtracking");
-const { scoreTimetable } = require("../utils/score");
+const { scoreTimetable } = require("../utils/score.js");
 const buildOptions = require("../scheduler/buildOptions");
 const store = require("../data/store");
 
