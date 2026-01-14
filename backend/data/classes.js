@@ -35,6 +35,7 @@ function parseExcel(file) {
 
     classes.push({
       maHP,
+      tenHP:row[headers.indexOf("Tên_HP")],
       maLop: row[headers.indexOf("Mã_lớp")],
       maLopKem: row[headers.indexOf("Mã_lớp_kèm")] || null,
       loai: row[headers.indexOf("Loại_lớp")],   // ⭐ CỰC KỲ QUAN TRỌNG

@@ -2,39 +2,63 @@ function buildOptions(classes) {
   const byHP = {};
   const options = {};
 
-  // 1. Gom theo học phần
+  // Gom theo học phần
   for (const cls of classes) {
     if (!byHP[cls.maHP]) byHP[cls.maHP] = [];
     byHP[cls.maHP].push(cls);
   }
 
-  // 2. Build options cho từng học phần
   for (const maHP in byHP) {
     const list = byHP[maHP];
+
+    const lt = list.filter(c => c.loai === "LT");
+    const bt = list.filter(c => c.loai === "BT");
+    const ltbt = list.filter(c => c.loai === "LT+BT");
+    const tn = list.filter(c => c.loai === "TN");
+
     options[maHP] = [];
 
-    // a. LT+BT (hoàn chỉnh)
-    list
-      .filter(c => c.loai === "LT+BT")
-      .forEach(c => options[maHP].push([c]));
-
-    // b. LT + BT combo
-    const LT = list.filter(c => c.loai === "LT" && !c.maLopKem);
-    const BT = list.filter(c => c.loai === "BT" && c.maLopKem);
-
-    for (const lt of LT) {
-      BT.filter(bt => bt.maLopKem === lt.maLop)
-        .forEach(bt => {
-          options[maHP].push([lt, bt]);
-        });
+    // 1️⃣ LT+BT gộp sẵn
+    for (const cls of ltbt) {
+      options[maHP].push({
+        maHP,
+        tenHP: cls.tenHP,
+        maLop: cls.maLop,
+        loai: "LT+BT",
+        sessions: cls.sessions
+      });
     }
 
-    // c. TN (độc lập)
-    list
-      .filter(c => c.loai === "TN")
-      .forEach(tn => {
-        options[maHP].push([tn]);
+    // 2️⃣ Ghép LT + BT theo mã lớp kèm
+    for (const ltCls of lt) {
+      const btOfLT = bt.filter(
+        b => b.maLopKem === ltCls.maLop
+      );
+
+      for (const btCls of btOfLT) {
+        options[maHP].push({
+          maHP,
+          tenHP: btCls.tenHP,
+          maLop: `${ltCls.maLop}+${btCls.maLop}`,
+          loai: "LT+BT",
+          sessions: [
+            ...ltCls.sessions,
+            ...btCls.sessions
+          ]
+        });
+      }
+    }
+
+    // 3️⃣ TN là option độc lập
+    for (const tnCls of tn) {
+      options[maHP].push({
+        maHP,
+        tenHP: tnCls.tenHP,
+        maLop: tnCls.maLop,
+        loai: "TN",
+        sessions: tnCls.sessions
       });
+    }
   }
 
   return options;
